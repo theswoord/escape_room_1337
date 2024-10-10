@@ -1,0 +1,82 @@
+const int button = 3;  // Pin for the button
+const int ledPin = 13; // LED pin
+int inputSequence[8];  // Array to store player's binary input
+int currentIndex = 0;  // Tracks player's current input position
+const int correctSequence[8] = {1, 0, 1, 1, 0, 0, 1, 1};  // Correct binary word
+
+enum GameState { WAITING, CHECKING, SUCCESS, RESET }; // Define states
+GameState state = WAITING; // Initial state
+
+void setup() {
+  pinMode(button, INPUT_PULLUP); // Set the button as input with pull-up
+  pinMode(ledPin, OUTPUT);        // Set the LED pin as output
+  Serial.begin(9600);             // Start serial communication at 9600 baud rate
+}
+
+bool trigger = false;
+unsigned long buttonPressStart = 0;
+
+void loop() {
+  switch (state) {
+    case WAITING:
+      // Read the button state
+      if (digitalRead(button) == HIGH && !trigger) { // Button is pressed and was not previously pressed
+        trigger = true; // Mark the button as pressed
+        buttonPressStart = millis(); // Record the time when the button was pressed
+      } else if (digitalRead(button) == LOW && trigger) {
+          trigger = false; // Button pressed
+          buttonPressStart = millis() - buttonPressStart;
+          if (buttonPressStart >= 500) {
+              inputSequence[currentIndex] = 1;
+              Serial.println("1");
+          } else { // Short press for '0'
+            inputSequence[currentIndex] = 0;
+            Serial.println("0");
+          }
+          currentIndex++; // Move to the next index
+          // Check if 8 bits have been entered
+          if (currentIndex == 8) {
+            state = CHECKING; // Move to CHECKING state
+          }
+        }
+      break;
+
+    case CHECKING:
+      if (checkInput()) {
+        state = SUCCESS; // Move to SUCCESS state if input is correct
+      } else {
+        resetGame(); // Reset if input is incorrect
+      }
+      break;
+
+    case SUCCESS:
+      digitalWrite(ledPin, HIGH); // Turn on LED
+      delay(5000); // Keep LED on for 5 seconds
+      resetGame(); // Reset the game
+      state = WAITING; // Go back to WAITING state
+      break;
+  }
+}
+
+// Display hints based on progress
+void displayHint() {
+  digitalWrite(ledPin, HIGH); // Turn on LED briefly
+  delay(100); // Show hint briefly
+  digitalWrite(ledPin, LOW); // Turn off LED
+}
+
+// Check if the input sequence matches the correct sequence
+bool checkInput() {
+  for (int i = 0; i < 8; i++) {
+    if (inputSequence[i] != correctSequence[i]) {
+      return false; // Incorrect input
+    }
+  }
+  return true; // Correct input
+}
+
+// Reset the game
+void resetGame() {
+  currentIndex = 0; // Reset input index
+  Serial.println("Game reset"); // Indicate reset
+}

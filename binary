@@ -1,0 +1,108 @@
+const int buttonZero = 7;  // Pin for the button 0
+const int buttonOne = 8;  // Pin for the button 1
+const int ledPinZero = 12; // LED pin 0
+const int ledPinOne = 13; // LED pin 1
+int inputSequence[5][8];  // Array to store player's binary input
+int currentIndex = 0;  // Tracks player's current input position index
+int currentArray = 0;  // Tracks player's current input position array
+unsigned long buttonPressStart0 = 0;
+unsigned long buttonPressStart1 = 0;
+const int correctSequence[5][8] = {
+	{0, 1, 1, 0, 0, 0, 0, 1}, //	a
+	{0, 1, 0, 1, 1, 0, 0, 0}, //	X
+	{0, 0, 1, 1, 0, 1, 1, 1}, //	7
+	{0, 0, 1, 1, 1, 0, 1, 1}, //	;
+	{0, 0, 1, 0, 0, 0, 0, 1}  //	!
+};  // Correct binary word
+
+enum GameState { WAITING, CHECKING, SUCCESS, RESET }; // Define states
+GameState state = WAITING; // Initial state
+
+void setup() {
+  pinMode(buttonZero, INPUT_PULLUP); // Set the button as input with pull-up for 0
+  pinMode(buttonOne, INPUT_PULLUP); // Set the button as input with pull-up for 1
+  pinMode(ledPinZero, OUTPUT);        // Set the LED pin as output 0
+  pinMode(ledPinOne, OUTPUT);        // Set the LED pin as output 1
+  Serial.begin(9600);             // Start serial communication at 9600 baud rate
+}
+
+void display() {
+  digitalWrite(ledPinZero, LOW);
+  digitalWrite(ledPinOne, LOW);
+  delay(200);
+  digitalWrite(ledPinZero, HIGH);
+  digitalWrite(ledPinOne, HIGH);
+  delay(200);
+}
+
+bool checkInput() {
+  for (int i = 0; i < 8; i++) {
+    for (int j = 0; j < 8; j++) {
+      if (inputSequence[i][j] != correctSequence[i][j])
+        return false;
+    }
+  }
+  return true;
+}
+
+void resetGame() {
+  currentIndex = 7;
+  while (currentIndex--) {
+    digitalWrite(ledPinOne, LOW);
+    digitalWrite(ledPinZero, HIGH);
+    delay(200);
+    digitalWrite(ledPinZero, LOW);
+    digitalWrite(ledPinOne, HIGH);
+    delay(200);
+  }
+  currentArray = 0;
+  Serial.println("Game reset");
+}
+
+void loop() {
+  switch (state) {
+    case WAITING:
+      if (digitalRead(buttonZero)) {
+        digitalWrite(ledPinOne, LOW);
+        digitalWrite(ledPinZero, HIGH);
+        inputSequence[currentArray][currentIndex] = 0;
+        Serial.println("0");
+		buttonPressStart0 = millis();
+        delay(200);
+      }
+      else if (digitalRead(buttonOne)) {
+        digitalWrite(ledPinZero, LOW);
+        digitalWrite(ledPinOne, HIGH);
+        inputSequence[currentArray][currentIndex] = 1;
+        Serial.println("1");
+		buttonPressStart1 = millis();
+        delay(200);
+      }
+      else {
+//        if ((millis() - buttonPressStart0) >= 1)
+//          digitalWrite(ledPinZero, LOW);
+//		else if (millis() - buttonPressStart1 >= 1)
+//          digitalWrite(ledPinOne, LOW);
+        break ;
+      }
+      currentIndex++;
+      if (currentIndex == 8) {
+        currentIndex = 0;
+        currentArray++;
+      }
+      if (currentArray == 8)
+        state = CHECKING;
+      break;
+
+    case CHECKING:
+      if (checkInput())
+        state = SUCCESS;
+      else
+        resetGame();
+      break;
+
+    case SUCCESS:
+      display();
+    break;
+  }
+}

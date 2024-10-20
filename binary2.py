@@ -13,7 +13,7 @@ ser = serial.Serial('/dev/ttyACM0', 9600)
 
 try:
     while True:
-        line = ser.readline().decode('utf-8').strip()  # Decode and strip whitespace
+        line = ser.readline().decode("iso-8859-1").strip()  # Decode and strip whitespace
         print(line)
 except Exception as e:
     print(f"An error occurred: {e}")

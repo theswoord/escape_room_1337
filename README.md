@@ -4,7 +4,7 @@ This repository contains the code and documentation for two distinct puzzles des
 This puzzle challenges players to input a binary sequence using two buttons, which is then converted into a word. The correct word acts as a clue or solution for the escape room.
 📜 How it Works
 
-Players interact with two physical buttons, representing '0' and '1'. They must press these buttons in a specific sequence to form a binary number. The Arduino reads this sequence, converts the binary input into a decimal number, and then maps that decimal number to a predefined word. If the sequence is correct, the associated word is revealed (e.g., via an LCD screen, LED array, or serial output to another system).
+Players interact with two physical buttons, representing '0' and '1'. They must press these buttons in a specific sequence to form a binary number. The Arduino reads this sequence, converts the binary input into a decimal number, and then maps that decimal number to a predefined word. If the sequence is correct, the associated word is revealed .
 🛠️ Components Used
 
     Arduino Board: (Arduino Uno)
@@ -16,16 +16,6 @@ Players interact with two physical buttons, representing '0' and '1'. They must 
     Display Mechanism: serial communication to a connected device
 
     Wiring: Jumper wires.
-
-⚙️ Setup and Code
-
-    Hardware Connection:
-
-        Connect the two push buttons to digital input pins on your Arduino (e.g., Pin 2 and Pin 3).
-
-        Ensure proper pull-up or pull-down resistors are used for stable readings, or enable internal pull-up resistors in your code.
-
-        Connect your chosen display mechanism (LCD, LEDs) to the appropriate Arduino pins as per its documentation.
 
 🧩 Puzzle 2: RFID Sequence Password (Raspberry Pi)
 
